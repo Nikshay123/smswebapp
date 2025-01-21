@@ -1,52 +1,49 @@
 pipeline {
     agent any
 
-    environment {
-        DOTNET_CLI_HOME = "C:\\Program Files\\dotnet"
-    }
-
     stages {
         stage('Checkout') {
             steps {
+                echo 'Checking out the source code...'
                 checkout scm
+            }
+        }
+
+        stage('Restore Dependencies') {
+            steps {
+                echo 'Restoring project dependencies...'
+                bat 'dotnet restore'
             }
         }
 
         stage('Build') {
             steps {
-                script {
-                    // Restoring dependencies
-                    //bat "cd ${DOTNET_CLI_HOME} && dotnet restore"
-                    bat "dotnet restore"
-
-                    // Building the application
-                    bat "dotnet build --configuration Release"
-                }
+                echo 'Building the application...'
+                bat 'dotnet build --configuration Release'
             }
         }
 
         stage('Test') {
             steps {
-                script {
-                    // Running tests
-                    bat "dotnet test --no-restore --configuration Release"
-                }
+                echo 'Running tests...'
+                bat 'dotnet test --no-restore --configuration Release'
             }
         }
 
         stage('Publish') {
             steps {
-                script {
-                    // Publishing the application
-                    bat "dotnet publish --no-restore --configuration Release --output .\\publish"
-                }
+                echo 'Publishing the application...'
+                bat 'dotnet publish --no-restore --configuration Release --output .\\publish'
             }
         }
     }
 
     post {
         success {
-            echo 'Build, test, and publish successful!'
+            echo 'Pipeline completed successfully! The build, test, and publish stages passed.'
+        }
+        failure {
+            echo 'Pipeline failed. Check the logs for details.'
         }
     }
 }
